@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 )
 
@@ -53,19 +54,28 @@ func main() {
 }
 
 func ray_color(r Ray) Color {
-	if hitSphere(Point3{0, 0, 1}, 0.5, r) {
-		return Color{1, 0, 0}
+	t := hitSphere(Point3{0, 0, -1}, 0.5, r)
+	if t > 0.0 {
+		N := UnitVector(SubtractVectors(r.At(t), Point3{0, 0, -1}))
+		return MultiplyScalar(Color{N.X + 1, N.Y + 1, N.Z + 1}, 0.5)
 	}
 	unitDirection := UnitVector(r.Direction)
-	t := 0.5 * (unitDirection.Y + 1.0)
-	return AddVectors(MultiplyScalar(Color{1, 1, 1}, 1-t), MultiplyScalar(Color{0.5, 0.7, 1}, t))
+	t = 0.5 * (unitDirection.Y + 1.0)
+	// return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+	return AddVectors(
+		MultiplyScalar(Color{1, 1, 1}, 1.0-t),
+		MultiplyScalar(Color{0.5, 0.7, 1.0}, t))
 }
 
-func hitSphere(center Point3, radius float64, r Ray) bool {
+func hitSphere(center Point3, radius float64, r Ray) float64 {
 	oc := SubtractVectors(r.Origin, center)
-	a := VectorDot(r.Direction, r.Direction)
-	b := 2.0 * VectorDot(r.Direction, oc)
-	c := VectorDot(oc, oc) - radius*radius
-	discriminant := b*b - 4*a*c
-	return discriminant > 0
+	a := r.Direction.LengthSquared()
+	halfB := VectorDot(r.Direction, oc)
+	c := oc.LengthSquared() - radius*radius
+	discriminant := halfB*halfB - a*c
+	if discriminant < 0 {
+		return -1.0
+	} else {
+		return (-halfB - math.Sqrt(discriminant)) / a
+	}
 }
