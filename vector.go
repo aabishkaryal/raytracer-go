@@ -137,6 +137,14 @@ func RandomUnitVector() Vec3 {
 	return UnitVector(RandomVectorInUnitSphere())
 }
 
+func RandomVectorInHemisphere(normal Vec3) Vec3 {
+	inUnitSphere := RandomVectorInUnitSphere()
+	if VectorDot(inUnitSphere, normal) > 0.0 {
+		return inUnitSphere
+	}
+	return inUnitSphere.Negative()
+}
+
 // Color Utility functions
 
 // WriteColor writes the color to the given writer
