@@ -43,7 +43,7 @@ func RayColor(r Ray, world Hittable, depth int) Color {
 	}
 
 	if ok, rec := world.Hit(r, 0.001, INFINITY); ok {
-		target := AddVectors(rec.P, AddVectors(rec.Normal, RandomVectorInUnitSphere()))
+		target := AddVectors(rec.P, AddVectors(rec.Normal, RandomUnitVector()))
 		ray := RayColor(
 			Ray{rec.P, SubtractVectors(target, rec.P)},
 			world,

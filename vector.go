@@ -133,6 +133,10 @@ func RandomVectorInUnitSphere() Vec3 {
 	}
 }
 
+func RandomUnitVector() Vec3 {
+	return UnitVector(RandomVectorInUnitSphere())
+}
+
 // Color Utility functions
 
 // WriteColor writes the color to the given writer
