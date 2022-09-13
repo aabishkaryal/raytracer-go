@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
 )
 
 // Equivalent of the vec3 class
@@ -112,6 +113,24 @@ func VectorCross(v1, v2 Vec3) Vec3 {
 // UnitVector returns the unit vector of the given vector
 func UnitVector(v Vec3) Vec3 {
 	return DivideScalar(v, v.Length())
+}
+
+func RandomVector() Vec3 {
+	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
+}
+
+func RandomVectorRange(min, max float64) Vec3 {
+	return Vec3{RandomRange(min, max), RandomRange(min, max), RandomRange(min, max)}
+}
+
+func RandomVectorInUnitSphere() Vec3 {
+	for {
+		p := RandomVectorRange(-1, 1)
+		if p.LengthSquared() >= 1 {
+			continue
+		}
+		return p
+	}
 }
 
 // Color Utility functions

@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 )
 
 func main() {
+	rand.Seed(time.Now().Unix())
+
 	// World
 	world := HittableList{}
 	world.Add(Sphere{Center: Point3{0, 0, -1}, Radius: 0.5})
@@ -22,10 +26,10 @@ func main() {
 		for i := 0; i < IMAGE_WIDTH; i++ {
 			pixelColor := Color{0, 0, 0}
 			for s := 0; s < SAMPLES_PER_PIXEL; s++ {
-				u := (float64(i) + RandomFloatRange(0, 1)) / float64(IMAGE_WIDTH-1)
-				v := (float64(j) + RandomFloatRange(0, 1)) / float64(IMAGE_HEIGHT-1)
+				u := (float64(i) + RandomRange(0, 1)) / float64(IMAGE_WIDTH-1)
+				v := (float64(j) + RandomRange(0, 1)) / float64(IMAGE_HEIGHT-1)
 				r := cam.GetRay(u, v)
-				pixelColor = AddVectors(pixelColor, ray_color(r, world))
+				pixelColor = AddVectors(pixelColor, RayColor(r, world, MAX_DEPTH))
 			}
 			WriteColor(os.Stdout, pixelColor, SAMPLES_PER_PIXEL)
 		}
@@ -33,9 +37,19 @@ func main() {
 	fmt.Fprintf(os.Stderr, "\nDone.\n")
 }
 
-func ray_color(r Ray, world Hittable) Color {
+func RayColor(r Ray, world Hittable, depth int) Color {
+	if depth <= 0 {
+		return Color{0, 0, 0}
+	}
+
 	if ok, rec := world.Hit(r, 0, INFINITY); ok {
-		return MultiplyScalar(AddVectors(rec.Normal, Color{1, 1, 1}), 0.5)
+		target := AddVectors(rec.P, AddVectors(rec.Normal, RandomVectorInUnitSphere()))
+		ray := RayColor(
+			Ray{rec.P, SubtractVectors(target, rec.P)},
+			world,
+			depth-1,
+		)
+		return MultiplyScalar(ray, 0.5)
 	}
 
 	unitDirection := UnitVector(r.Direction)
