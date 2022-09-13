@@ -117,9 +117,11 @@ func UnitVector(v Vec3) Vec3 {
 // Color Utility functions
 
 // WriteColor writes the color to the given writer
-func WriteColor(out io.Writer, color Color) {
-	r := int(255.999 * color.X)
-	g := int(255.999 * color.Y)
-	b := int(255.999 * color.Z)
-	fmt.Fprintf(out, "%v %v %v\n", r, g, b)
+func WriteColor(out io.Writer, color Color, samplesPerPixel int) {
+	c := DivideScalar(color, float64(samplesPerPixel))
+
+	r := 256.0 * Clamp(c.X, 0, 0.999)
+	g := 256.0 * Clamp(c.Y, 0, 0.999)
+	b := 256.0 * Clamp(c.Z, 0, 0.999)
+	fmt.Fprintf(out, "%v %v %v\n", int(r), int(g), int(b))
 }
