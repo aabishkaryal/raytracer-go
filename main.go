@@ -14,7 +14,7 @@ func main() {
 	world := HittableList{}
 
 	materialGround := Lambertian{Color{0.8, 0.8, 0.0}}
-	materialCenter := Dielectric{1.5}
+	materialCenter := Lambertian{Color{0.1, 0.2, 0.5}}
 	materialLeft := Dielectric{1.5}
 	materialRight := Metal{Color{0.8, 0.6, 0.2}, 1.0}
 
