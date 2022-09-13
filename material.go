@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 type Material interface {
 	Scatter(rIn Ray, rec HitRecord) (bool, Ray, Color)
@@ -53,9 +56,10 @@ func (d Dielectric) Scatter(rIn Ray, rec HitRecord) (bool, Ray, Color) {
 	cosTheta := math.Min(VectorDot(unitDirection.Negative(), rec.Normal), 1.0)
 	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 
+	cannotRefract := refractionRatio*sinTheta > 1.0
 	var direction Vec3
 
-	if refractionRatio*sinTheta > 1.0 {
+	if cannotRefract || d.reflectance(cosTheta, refractionRatio) > rand.Float64() {
 		direction = Reflect(unitDirection, rec.Normal)
 	} else {
 		direction = Refract(unitDirection, rec.Normal, refractionRatio)
@@ -63,4 +67,11 @@ func (d Dielectric) Scatter(rIn Ray, rec HitRecord) (bool, Ray, Color) {
 
 	scattered := Ray{rec.P, direction}
 	return true, scattered, attenuation
+}
+
+func (d Dielectric) reflectance(cosine, refIdx float64) float64 {
+	// Use Schlick's approximation for reflectance.
+	r0 := (1 - refIdx) / (1 + refIdx)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow((1-cosine), 5)
 }
