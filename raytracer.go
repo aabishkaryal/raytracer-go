@@ -2,17 +2,20 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"os"
 )
 
-const (
-	IMAGE_WIDTH  = 800
-	IMAGE_HEIGHT = 450
-	ASPECT_RATIO = 16.0 / 9.0
-)
-
 func main() {
+	// Image
+	ASPECT_RATIO := 16.0 / 9.0
+	IMAGE_WIDTH := 800
+	IMAGE_HEIGHT := int(float64(IMAGE_WIDTH) / ASPECT_RATIO)
+
+	// World
+	world := HittableList{}
+	world.Add(Sphere{Center: Point3{0, 0, -1}, Radius: 0.5})
+	world.Add(Sphere{Center: Point3{0, -100.5, -1}, Radius: 100})
+
 	// Camera
 	viewportHeight := 2.0
 	viewportWidth := ASPECT_RATIO * viewportHeight
@@ -35,8 +38,8 @@ func main() {
 	for j := IMAGE_HEIGHT - 1; j >= 0; j-- {
 		fmt.Fprintf(os.Stderr, "\rScanlines remaining: %d", j)
 		for i := 0; i < IMAGE_WIDTH; i++ {
-			u := float64(i) / (IMAGE_WIDTH - 1)
-			v := float64(j) / (IMAGE_HEIGHT - 1)
+			u := float64(i) / float64(IMAGE_WIDTH-1)
+			v := float64(j) / float64(IMAGE_HEIGHT-1)
 			// lower_left_corner + u*horizontal + v*vertical - origin
 			direction := SubtractVectors(
 				AddVectors(
@@ -46,36 +49,19 @@ func main() {
 				origin)
 
 			r := Ray{origin, direction}
-			pixelColor := ray_color(r)
+			pixelColor := ray_color(r, world)
 			WriteColor(os.Stdout, pixelColor)
 		}
 	}
 	fmt.Fprintf(os.Stderr, "\nDone.\n")
 }
 
-func ray_color(r Ray) Color {
-	t := hitSphere(Point3{0, 0, -1}, 0.5, r)
-	if t > 0.0 {
-		N := UnitVector(SubtractVectors(r.At(t), Point3{0, 0, -1}))
-		return MultiplyScalar(Color{N.X + 1, N.Y + 1, N.Z + 1}, 0.5)
+func ray_color(r Ray, world Hittable) Color {
+	if ok, rec := world.Hit(r, 0, INFINITY); ok {
+		return MultiplyScalar(AddVectors(rec.Normal, Color{1, 1, 1}), 0.5)
 	}
-	unitDirection := UnitVector(r.Direction)
-	t = 0.5 * (unitDirection.Y + 1.0)
-	// return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
-	return AddVectors(
-		MultiplyScalar(Color{1, 1, 1}, 1.0-t),
-		MultiplyScalar(Color{0.5, 0.7, 1.0}, t))
-}
 
-func hitSphere(center Point3, radius float64, r Ray) float64 {
-	oc := SubtractVectors(r.Origin, center)
-	a := r.Direction.LengthSquared()
-	halfB := VectorDot(r.Direction, oc)
-	c := oc.LengthSquared() - radius*radius
-	discriminant := halfB*halfB - a*c
-	if discriminant < 0 {
-		return -1.0
-	} else {
-		return (-halfB - math.Sqrt(discriminant)) / a
-	}
+	unitDirection := UnitVector(r.Direction)
+	t := 0.5 * (unitDirection.Y + 1.0)
+	return AddVectors(MultiplyScalar(Color{1.0, 1.0, 1.0}, 1.0-t), MultiplyScalar(Color{0.5, 0.7, 1.0}, t))
 }
