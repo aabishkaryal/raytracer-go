@@ -161,6 +161,23 @@ func Reflect(v, n Vec3) Vec3 {
 	return SubtractVectors(v, MultiplyScalar(n, 2*VectorDot(v, n)))
 }
 
+// Refract returns the refraction of the vector about the normal
+func Refract(uv, n Vec3, etaiOverEtat float64) Vec3 {
+	cosTheta := math.Min(VectorDot(uv.Negative(), n), 1.0)
+	rOutPerp := MultiplyScalar(
+		AddVectors(
+			uv,
+			MultiplyScalar(n, cosTheta),
+		),
+		etaiOverEtat,
+	)
+	rOutParallel := MultiplyScalar(
+		n,
+		-math.Sqrt(math.Abs(1.0-rOutPerp.LengthSquared())),
+	)
+	return AddVectors(rOutPerp, rOutParallel)
+}
+
 // Color Utility functions
 
 // WriteColor writes the color to the given writer

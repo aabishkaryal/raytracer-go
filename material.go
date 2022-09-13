@@ -34,3 +34,20 @@ func (m Metal) Scatter(rIn Ray, rec HitRecord) (bool, Ray, Color) {
 	attenuation := m.Albedo
 	return (VectorDot(scattered.Direction, rec.Normal) > 0), scattered, attenuation
 }
+
+// Dielectric Material
+type Dielectric struct {
+	RefIdx float64
+}
+
+func (d Dielectric) Scatter(rIn Ray, rec HitRecord) (bool, Ray, Color) {
+	attenuation := Color{1.0, 1.0, 1.0}
+	refractionRatio := d.RefIdx
+	if rec.FrontFace {
+		refractionRatio = 1.0 / d.RefIdx
+	}
+	unitDirection := UnitVector(rIn.Direction)
+	refracted := Refract(unitDirection, rec.Normal, refractionRatio)
+	scattered := Ray{rec.P, refracted}
+	return true, scattered, attenuation
+}
