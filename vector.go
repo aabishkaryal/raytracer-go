@@ -75,6 +75,12 @@ func (v Vec3) Print(out io.Writer) {
 	fmt.Fprintf(out, "%v %v %v", v.X, v.Y, v.Z)
 }
 
+// Returns true if the vector is close to zero in all dimensions
+func (v Vec3) NearZero() bool {
+	s := 1e-8
+	return (math.Abs(v.X) < s) && (math.Abs(v.Y) < s) && (math.Abs(v.Z) < s)
+}
+
 // AddVectors returns the sum of the two vectors
 func AddVectors(v1, v2 Vec3) Vec3 {
 	return Vec3{v1.X + v2.X, v1.Y + v2.Y, v1.Z + v2.Z}
@@ -115,14 +121,17 @@ func UnitVector(v Vec3) Vec3 {
 	return DivideScalar(v, v.Length())
 }
 
+// RandomVector returns a random vector in the unit cube
 func RandomVector() Vec3 {
 	return Vec3{rand.Float64(), rand.Float64(), rand.Float64()}
 }
 
+// RandomVectorRange returns a random vector in the given range
 func RandomVectorRange(min, max float64) Vec3 {
 	return Vec3{RandomRange(min, max), RandomRange(min, max), RandomRange(min, max)}
 }
 
+// RandomVectorInUnitSphere returns a random vector in the unit sphere
 func RandomVectorInUnitSphere() Vec3 {
 	for {
 		p := RandomVectorRange(-1, 1)
@@ -133,16 +142,23 @@ func RandomVectorInUnitSphere() Vec3 {
 	}
 }
 
+// RandomVectorInUnitDisk returns a random vector in the unit disk
 func RandomUnitVector() Vec3 {
 	return UnitVector(RandomVectorInUnitSphere())
 }
 
+// RandomVectorInHemisphere returns a random vector in the hemisphere
 func RandomVectorInHemisphere(normal Vec3) Vec3 {
 	inUnitSphere := RandomVectorInUnitSphere()
 	if VectorDot(inUnitSphere, normal) > 0.0 {
 		return inUnitSphere
 	}
 	return inUnitSphere.Negative()
+}
+
+// Reflect returns the reflection of the vector about the normal
+func Reflect(v, n Vec3) Vec3 {
+	return SubtractVectors(v, MultiplyScalar(n, 2*VectorDot(v, n)))
 }
 
 // Color Utility functions

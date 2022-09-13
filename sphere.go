@@ -5,6 +5,7 @@ import "math"
 type Sphere struct {
 	Center Point3
 	Radius float64
+	MatPtr Material
 }
 
 func (s Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, HitRecord) {
@@ -33,6 +34,7 @@ func (s Sphere) Hit(r Ray, tMin float64, tMax float64) (bool, HitRecord) {
 		T:      root,
 		P:      r.At(root),
 		Normal: DivideScalar(SubtractVectors(r.At(root), s.Center), s.Radius),
+		MatPtr: s.MatPtr,
 	}
 	rec.SetFaceNormal(r, rec.Normal)
 
