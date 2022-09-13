@@ -138,9 +138,10 @@ func RandomVectorInUnitSphere() Vec3 {
 // WriteColor writes the color to the given writer
 func WriteColor(out io.Writer, color Color, samplesPerPixel int) {
 	c := DivideScalar(color, float64(samplesPerPixel))
+	r, g, b := math.Sqrt(c.X), math.Sqrt(c.Y), math.Sqrt(c.Z)
 
-	r := 256.0 * Clamp(c.X, 0, 0.999)
-	g := 256.0 * Clamp(c.Y, 0, 0.999)
-	b := 256.0 * Clamp(c.Z, 0, 0.999)
+	r = 256.0 * Clamp(r, 0, 0.999)
+	g = 256.0 * Clamp(g, 0, 0.999)
+	b = 256.0 * Clamp(b, 0, 0.999)
 	fmt.Fprintf(out, "%v %v %v\n", int(r), int(g), int(b))
 }

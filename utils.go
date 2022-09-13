@@ -1,18 +1,21 @@
 package main
 
-import "math/rand"
+import (
+	"math"
+	"math/rand"
+)
 
 // Constants
 const (
 	INFINITY          = 1e8
 	PI                = 3.1415926535897932385
 	ASPECT_RATIO      = 16.0 / 9.0
-	IMAGE_WIDTH       = 800
+	IMAGE_WIDTH       = 200
 	SAMPLES_PER_PIXEL = 100
 	MAX_DEPTH         = 50
 )
 
-var IMAGE_HEIGHT int = int(float64(IMAGE_WIDTH) / ASPECT_RATIO)
+var IMAGE_HEIGHT int = int(math.Floor(float64(IMAGE_WIDTH) / ASPECT_RATIO))
 
 func DegreesToRadians(degrees float64) float64 {
 	return degrees * PI / 180.0
