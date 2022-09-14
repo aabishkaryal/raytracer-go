@@ -9,34 +9,44 @@ type Camera struct {
 	Vertical        Vec3
 }
 
-func NewCamera(verticalFOV, aspectRatio float64) Camera {
+func NewCamera(lookFrom, lookAt Point3, vup Vec3, verticalFOV, aspectRatio float64) Camera {
 	theta := DegreesToRadians(verticalFOV)
 	h := math.Tan(theta / 2)
-
 	viewportHeight := 2.0 * h
 	viewportWidth := aspectRatio * viewportHeight
-	focalLength := 1.0
 
-	origin := Point3{0, 0, 0}
-	horizontal := Vec3{viewportWidth, 0, 0}
-	vertical := Vec3{0, viewportHeight, 0}
-	// lower_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length)
+	w := UnitVector(SubtractVectors(lookFrom, lookAt))
+	u := UnitVector(VectorCross(vup, w))
+	v := VectorCross(w, u)
+
+	origin := lookFrom
+	horizontal := MultiplyScalar(u, viewportWidth)
+	vertical := MultiplyScalar(v, viewportHeight)
+	// lower_left_corner = origin - horizontal/2 - vertical/2 - w;
 	lowerLeftCorner := SubtractVectors(
 		SubtractVectors(
-			SubtractVectors(origin,
-				DivideScalar(horizontal, 2)),
-			DivideScalar(vertical, 2)),
-		Vec3{0, 0, focalLength})
+			SubtractVectors(
+				origin,
+				DivideScalar(horizontal, 2),
+			),
+			DivideScalar(vertical, 2),
+		),
+		w,
+	)
 
 	return Camera{origin, lowerLeftCorner, horizontal, vertical}
 }
 
-func (c Camera) GetRay(u, v float64) Ray {
+func (c Camera) GetRay(s, t float64) Ray {
 	direction := SubtractVectors(
 		AddVectors(
-			AddVectors(c.LowerLeftCorner,
-				MultiplyScalar(c.Horizontal, u)),
-			MultiplyScalar(c.Vertical, v)),
-		c.Origin)
+			AddVectors(
+				c.LowerLeftCorner,
+				MultiplyScalar(c.Horizontal, s),
+			),
+			MultiplyScalar(c.Vertical, t),
+		),
+		c.Origin,
+	)
 	return Ray{c.Origin, direction}
 }
