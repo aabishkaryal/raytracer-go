@@ -21,6 +21,7 @@ func main() {
 	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, materialGround})
 	world.Add(Sphere{Vec3{0, 0, -1}, 0.5, materialCenter})
 	world.Add(Sphere{Vec3{-1, 0, -1}, 0.5, materialLeft})
+	world.Add(Sphere{Vec3{-1, 0, -1}, -0.4, materialLeft})
 	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, materialRight})
 
 	// Camera
