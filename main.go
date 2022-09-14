@@ -11,25 +11,14 @@ func main() {
 	rand.Seed(time.Now().Unix())
 
 	// World
-	world := HittableList{}
-
-	materialGround := Lambertian{Color{0.8, 0.8, 0.0}}
-	materialCenter := Lambertian{Color{0.1, 0.2, 0.5}}
-	materialLeft := Dielectric{1.5}
-	materialRight := Metal{Color{0.8, 0.6, 0.2}, 0.0}
-
-	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, materialGround})
-	world.Add(Sphere{Vec3{0, 0, -1}, 0.5, materialCenter})
-	world.Add(Sphere{Vec3{-1, 0, -1}, 0.5, materialLeft})
-	world.Add(Sphere{Vec3{-1, 0, -1}, -0.45, materialLeft})
-	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, materialRight})
+	world := RandomScene()
 
 	// Camera
-	lookFrom := Point3{3, 3, 2}
-	lookAt := Point3{0, 0, -1}
+	lookFrom := Point3{13, 2, 3}
+	lookAt := Point3{0, 0, 0}
 	vUp := Vec3{0, 1, 0}
-	distToFocus := SubtractVectors(lookFrom, lookAt).Length()
-	aperture := 2.0
+	distToFocus := 10.0
+	aperture := 0.1
 	cam := NewCamera(
 		lookFrom,
 		lookAt,
@@ -74,4 +63,52 @@ func RayColor(r Ray, world Hittable, depth int) Color {
 	unitDirection := UnitVector(r.Direction)
 	t := 0.5 * (unitDirection.Y + 1.0)
 	return AddVectors(MultiplyScalar(Color{1.0, 1.0, 1.0}, 1.0-t), MultiplyScalar(Color{0.5, 0.7, 1.0}, t))
+}
+
+func RandomScene() HittableList {
+	world := HittableList{}
+
+	groundMaterial := Lambertian{Color{0.5, 0.5, 0.5}}
+
+	world.Add(Sphere{Point3{0, -1000, 0}, 1000, groundMaterial})
+
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+			chooseMat := rand.Float64()
+			center := Point3{
+				float64(a) + 0.9*rand.Float64(),
+				0.2,
+				float64(b) + 0.9*rand.Float64(),
+			}
+
+			if SubtractVectors(center, Point3{4, 0.2, 0}).Length() > 0.9 {
+				if chooseMat < 0.8 {
+					// diffuse
+					albedo := MultiplyVectors(RandomVector(), RandomVector())
+					sphereMaterial := Lambertian{albedo}
+					world.Add(Sphere{center, 0.2, sphereMaterial})
+				} else if chooseMat < 0.95 {
+					// metal
+					albedo := RandomVectorRange(0.5, 1)
+					sphereMaterial := Lambertian{albedo}
+					world.Add(Sphere{center, 0.2, sphereMaterial})
+				} else {
+					// glass
+					sphereMaterial := Dielectric{1.5}
+					world.Add(Sphere{center, 0.2, sphereMaterial})
+				}
+			}
+		}
+	}
+
+	material1 := Dielectric{1.5}
+	world.Add(Sphere{Point3{0, 1, 0}, 1.0, material1})
+
+	material2 := Lambertian{Color{0.4, 0.2, 0.1}}
+	world.Add(Sphere{Point3{-4, 1, 0}, 1.0, material2})
+
+	material3 := Metal{Color{0.7, 0.6, 0.5}, 0.0}
+	world.Add(Sphere{Point3{4, 1, 0}, 1.0, material3})
+
+	return world
 }

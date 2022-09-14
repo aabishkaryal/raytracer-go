@@ -9,9 +9,9 @@ import (
 const (
 	INFINITY          = 1e8
 	PI                = 3.1415926535897932385
-	ASPECT_RATIO      = 16.0 / 9.0
-	IMAGE_WIDTH       = 800
-	SAMPLES_PER_PIXEL = 100
+	ASPECT_RATIO      = 3.0 / 2.0
+	IMAGE_WIDTH       = 1200
+	SAMPLES_PER_PIXEL = 500
 	MAX_DEPTH         = 50
 )
 
