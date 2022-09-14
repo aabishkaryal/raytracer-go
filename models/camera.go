@@ -1,6 +1,10 @@
-package main
+package models
 
-import "math"
+import (
+	"math"
+
+	"github.com/aabishkaryal/raytracer-go/utils"
+)
 
 type Camera struct {
 	Origin          Point3
@@ -16,7 +20,7 @@ func NewCamera(lookFrom, lookAt Point3,
 	verticalFOV, aspectRatio float64,
 	aperture, focusDistance float64,
 ) Camera {
-	theta := DegreesToRadians(verticalFOV)
+	theta := utils.DegreesToRadians(verticalFOV)
 	h := math.Tan(theta / 2)
 	viewportHeight := 2.0 * h
 	viewportWidth := aspectRatio * viewportHeight
@@ -63,7 +67,7 @@ func (c Camera) GetRay(s, t float64) Ray {
 		),
 		offset,
 	)
-	
+
 	return Ray{
 		AddVectors(c.Origin, offset),
 		direction,

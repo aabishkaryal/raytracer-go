@@ -1,4 +1,4 @@
-package main
+package models
 
 type Ray struct {
 	Origin    Point3

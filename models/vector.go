@@ -1,10 +1,12 @@
-package main
+package models
 
 import (
 	"fmt"
 	"io"
 	"math"
 	"math/rand"
+
+	"github.com/aabishkaryal/raytracer-go/utils"
 )
 
 // Equivalent of the vec3 class
@@ -62,11 +64,6 @@ func (v Vec3) At(i int) float64 {
 		panic("index out of range")
 	}
 }
-
-type (
-	Color  = Vec3
-	Point3 = Vec3
-)
 
 // Vec3 Utility functions
 
@@ -128,7 +125,7 @@ func RandomVector() Vec3 {
 
 // RandomVectorRange returns a random vector in the given range
 func RandomVectorRange(min, max float64) Vec3 {
-	return Vec3{RandomRange(min, max), RandomRange(min, max), RandomRange(min, max)}
+	return Vec3{utils.RandomRange(min, max), utils.RandomRange(min, max), utils.RandomRange(min, max)}
 }
 
 // RandomVectorInUnitSphere returns a random vector in the unit sphere
@@ -159,7 +156,7 @@ func RandomVectorInHemisphere(normal Vec3) Vec3 {
 // RandomVectorInUnitDisk returns a random vector in the unit disk
 func RandomVectorInUnitDisk() Vec3 {
 	for {
-		p := Vec3{RandomRange(-1, 1), RandomRange(-1, 1), 0}
+		p := Vec3{utils.RandomRange(-1, 1), utils.RandomRange(-1, 1), 0}
 		if p.LengthSquared() >= 1 {
 			continue
 		}
@@ -187,17 +184,4 @@ func Refract(uv, n Vec3, etaiOverEtat float64) Vec3 {
 		-math.Sqrt(math.Abs(1.0-rOutPerp.LengthSquared())),
 	)
 	return AddVectors(rOutPerp, rOutParallel)
-}
-
-// Color Utility functions
-
-// WriteColor writes the color to the given writer
-func WriteColor(out io.Writer, color Color, samplesPerPixel int) {
-	c := DivideScalar(color, float64(samplesPerPixel))
-	r, g, b := math.Sqrt(c.X), math.Sqrt(c.Y), math.Sqrt(c.Z)
-
-	r = 256.0 * Clamp(r, 0, 0.999)
-	g = 256.0 * Clamp(g, 0, 0.999)
-	b = 256.0 * Clamp(b, 0, 0.999)
-	fmt.Fprintf(out, "%v %v %v\n", int(r), int(g), int(b))
 }

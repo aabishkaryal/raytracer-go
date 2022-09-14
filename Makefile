@@ -1,2 +1,2 @@
 build:
-	go run *.go > image.ppm
+	go run cmd/main.go > image.ppm
