@@ -142,7 +142,7 @@ func RandomVectorInUnitSphere() Vec3 {
 	}
 }
 
-// RandomVectorInUnitDisk returns a random vector in the unit disk
+// RandomVectorInUnitDisk returns a random unit vector in the unit sphere
 func RandomUnitVector() Vec3 {
 	return UnitVector(RandomVectorInUnitSphere())
 }
@@ -154,6 +154,17 @@ func RandomVectorInHemisphere(normal Vec3) Vec3 {
 		return inUnitSphere
 	}
 	return inUnitSphere.Negative()
+}
+
+// RandomVectorInUnitDisk returns a random vector in the unit disk
+func RandomVectorInUnitDisk() Vec3 {
+	for {
+		p := Vec3{RandomRange(-1, 1), RandomRange(-1, 1), 0}
+		if p.LengthSquared() >= 1 {
+			continue
+		}
+		return p
+	}
 }
 
 // Reflect returns the reflection of the vector about the normal

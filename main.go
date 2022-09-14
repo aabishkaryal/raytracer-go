@@ -25,12 +25,19 @@ func main() {
 	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, materialRight})
 
 	// Camera
+	lookFrom := Point3{3, 3, 2}
+	lookAt := Point3{0, 0, -1}
+	vUp := Vec3{0, 1, 0}
+	distToFocus := SubtractVectors(lookFrom, lookAt).Length()
+	aperture := 2.0
 	cam := NewCamera(
-		Point3{-2, 2, 1},
-		Point3{0, 0, -1},
-		Vec3{0, 1, 0},
-		20.0,
+		lookFrom,
+		lookAt,
+		vUp,
+		20,
 		ASPECT_RATIO,
+		aperture,
+		distToFocus,
 	)
 
 	// Render

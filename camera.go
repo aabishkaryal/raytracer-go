@@ -7,9 +7,15 @@ type Camera struct {
 	LowerLeftCorner Point3
 	Horizontal      Vec3
 	Vertical        Vec3
+	U, V, W         Vec3
+	LensRadius      float64
 }
 
-func NewCamera(lookFrom, lookAt Point3, vup Vec3, verticalFOV, aspectRatio float64) Camera {
+func NewCamera(lookFrom, lookAt Point3,
+	vup Vec3,
+	verticalFOV, aspectRatio float64,
+	aperture, focusDistance float64,
+) Camera {
 	theta := DegreesToRadians(verticalFOV)
 	h := math.Tan(theta / 2)
 	viewportHeight := 2.0 * h
@@ -20,9 +26,9 @@ func NewCamera(lookFrom, lookAt Point3, vup Vec3, verticalFOV, aspectRatio float
 	v := VectorCross(w, u)
 
 	origin := lookFrom
-	horizontal := MultiplyScalar(u, viewportWidth)
-	vertical := MultiplyScalar(v, viewportHeight)
-	// lower_left_corner = origin - horizontal/2 - vertical/2 - w;
+	horizontal := MultiplyScalar(u, viewportWidth*focusDistance)
+	vertical := MultiplyScalar(v, viewportHeight*focusDistance)
+	// lower_left_corner = origin - horizontal/2 - vertical/2 - focusDistance*w;
 	lowerLeftCorner := SubtractVectors(
 		SubtractVectors(
 			SubtractVectors(
@@ -31,22 +37,35 @@ func NewCamera(lookFrom, lookAt Point3, vup Vec3, verticalFOV, aspectRatio float
 			),
 			DivideScalar(vertical, 2),
 		),
-		w,
+		MultiplyScalar(w, focusDistance),
 	)
 
-	return Camera{origin, lowerLeftCorner, horizontal, vertical}
+	return Camera{origin, lowerLeftCorner, horizontal, vertical, u, v, w, aperture / 2}
 }
 
 func (c Camera) GetRay(s, t float64) Ray {
-	direction := SubtractVectors(
-		AddVectors(
-			AddVectors(
-				c.LowerLeftCorner,
-				MultiplyScalar(c.Horizontal, s),
-			),
-			MultiplyScalar(c.Vertical, t),
-		),
-		c.Origin,
+	rd := MultiplyScalar(RandomVectorInUnitDisk(), c.LensRadius)
+	offset := AddVectors(
+		MultiplyScalar(c.U, rd.X),
+		MultiplyScalar(c.V, rd.Y),
 	)
-	return Ray{c.Origin, direction}
+
+	direction := SubtractVectors(
+		SubtractVectors(
+			AddVectors(
+				AddVectors(
+					c.LowerLeftCorner,
+					MultiplyScalar(c.Horizontal, s),
+				),
+				MultiplyScalar(c.Vertical, t),
+			),
+			c.Origin,
+		),
+		offset,
+	)
+	
+	return Ray{
+		AddVectors(c.Origin, offset),
+		direction,
+	}
 }
