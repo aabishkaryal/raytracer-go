@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"os"
 	"time"
@@ -11,21 +12,17 @@ func main() {
 	rand.Seed(time.Now().Unix())
 
 	// World
+	R := math.Cos(PI / 4)
 	world := HittableList{}
 
-	materialGround := Lambertian{Color{0.8, 0.8, 0.0}}
-	materialCenter := Lambertian{Color{0.1, 0.2, 0.5}}
-	materialLeft := Dielectric{1.5}
-	materialRight := Metal{Color{0.8, 0.6, 0.2}, 1.0}
+	materialLeft := Lambertian{Color{0, 0, 1}}
+	materialRight := Lambertian{Color{1, 0, 0}}
 
-	world.Add(Sphere{Vec3{0, -100.5, -1}, 100, materialGround})
-	world.Add(Sphere{Vec3{0, 0, -1}, 0.5, materialCenter})
-	world.Add(Sphere{Vec3{-1, 0, -1}, 0.5, materialLeft})
-	world.Add(Sphere{Vec3{-1, 0, -1}, -0.4, materialLeft})
-	world.Add(Sphere{Vec3{1, 0, -1}, 0.5, materialRight})
+	world.Add(Sphere{Point3{-R, 0, -1}, R, materialLeft})
+	world.Add(Sphere{Point3{R, 0, -1}, R, materialRight})
 
 	// Camera
-	cam := NewCamera()
+	cam := NewCamera(90.0, ASPECT_RATIO)
 
 	// Render
 	fmt.Printf("P3\n%d %d\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT)
