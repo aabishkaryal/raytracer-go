@@ -13,8 +13,8 @@ type Color = Vec3
 // Color Utility functions
 
 // WriteColor writes the color to the given writer
-func WriteColor(out io.Writer, color Color, samplesPerPixel int) {
-	c := DivideScalar(color, float64(samplesPerPixel))
+func WriteColor(out io.Writer, color Color, samplesPerPixel float64) {
+	c := DivideScalar(color, samplesPerPixel)
 	r, g, b := math.Sqrt(c.X), math.Sqrt(c.Y), math.Sqrt(c.Z)
 
 	r = 256.0 * utils.Clamp(r, 0, 0.999)
