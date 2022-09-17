@@ -6,7 +6,7 @@ After completing the port, I wish to add some features to it, such as a GUI and 
 ## TODOs:
 
 -   [x] Port the C++ code to Go
--   [ ] Parallelize the rendering process
+-   [x] Parallelize the rendering process
 -   [x] Make it customizable with command line flags
 -   [ ] Add a GUI
 
