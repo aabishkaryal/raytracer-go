@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"math/rand"
 	"os"
@@ -11,7 +12,10 @@ import (
 	"github.com/aabishkaryal/raytracer-go/utils"
 )
 
-func Raytrace(imageWidth int, samplesPerPixel, maxDepth, aspectRatio, verticalFieldOfView, numCPUs float64) {
+func Raytrace(imageWidth int,
+	samplesPerPixel, maxDepth, aspectRatio, verticalFieldOfView, numCPUs float64,
+	output io.Writer,
+) {
 	rand.Seed(time.Now().Unix())
 
 	imageHeight := int(math.Floor(float64(imageWidth) / aspectRatio)) // image height
@@ -39,10 +43,10 @@ func Raytrace(imageWidth int, samplesPerPixel, maxDepth, aspectRatio, verticalFi
 	workerManager := NewWorkerManager(imageWidth, imageHeight, samplesPerPixel, maxDepth, int(numCPUs), world, cam)
 	image := workerManager.Start()
 
-	fmt.Printf("P3\n%d %d\n255\n", imageWidth, imageHeight)
+	fmt.Fprintf(output, "P3\n%d %d\n255\n", imageWidth, imageHeight)
 	for j := imageHeight - 1; j >= 0; j-- {
 		for i := 0; i < imageWidth; i++ {
-			models.WriteColor(os.Stdout, image[j][i], samplesPerPixel)
+			models.WriteColor(output, image[j][i], samplesPerPixel)
 		}
 	}
 	fmt.Fprintf(os.Stderr, "\nDone.\n")

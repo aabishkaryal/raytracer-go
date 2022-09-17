@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 	"runtime"
 
 	"github.com/aabishkaryal/raytracer-go/app"
@@ -16,11 +17,19 @@ func main() {
 	maxDepth := flag.Int("maxDepth", utils.MAX_DEPTH, "Maximum depth of the ray to trace.")
 	verticalFieldOfView := flag.Int("verticalFOV", utils.VERTICAL_FOV, "Vertical field of view of the camera.")
 	numCPUs := flag.Int("numCPUs", runtime.NumCPU()/2, "Number of CPUs to use.")
+	outputFile := flag.String("output", "image.ppm", "Output file name.")
 
 	flag.Parse()
 
+	// Check if the number of CPUs is valid
 	if *numCPUs < 1 {
 		panic("NumCPUs must be at least 1.")
+	}
+
+	// Create the output file
+	output, err := os.OpenFile(*outputFile, os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		panic(err)
 	}
 
 	app.Raytrace(
@@ -30,5 +39,6 @@ func main() {
 		*aspectRatio,
 		float64(*verticalFieldOfView),
 		float64(*numCPUs),
+		output,
 	)
 }
