@@ -11,10 +11,10 @@ import (
 	"github.com/aabishkaryal/raytracer-go/utils"
 )
 
-func Raytrace(imageWidth, samplesPerPixel, maxDepth, aspectRatio, verticalFieldOfView float64) {
+func Raytrace(imageWidth int, samplesPerPixel, maxDepth, aspectRatio, verticalFieldOfView, numCPUs float64) {
 	rand.Seed(time.Now().Unix())
 
-	imageHeight := math.Floor(imageWidth / aspectRatio) // image height
+	imageHeight := int(math.Floor(float64(imageWidth) / aspectRatio)) // image height
 
 	// World
 	world := models.RandomScene()
@@ -35,20 +35,14 @@ func Raytrace(imageWidth, samplesPerPixel, maxDepth, aspectRatio, verticalFieldO
 		distToFocus,
 	)
 
-	// Render
-	fmt.Printf("P3\n%d %d\n255\n", int(imageWidth), int(imageHeight))
+	// Render with workers
+	workerManager := NewWorkerManager(imageWidth, imageHeight, samplesPerPixel, maxDepth, int(numCPUs), world, cam)
+	image := workerManager.Start()
 
+	fmt.Printf("P3\n%d %d\n255\n", imageWidth, imageHeight)
 	for j := imageHeight - 1; j >= 0; j-- {
-		fmt.Fprintf(os.Stderr, "\033[2K\rScanlines remaining: %d/%d", int(j), int(imageHeight))
-		for i := 0.0; i < imageWidth; i++ {
-			pixelColor := models.Color{X: 0, Y: 0, Z: 0}
-			for s := 0.0; s < samplesPerPixel; s++ {
-				u := (i + utils.RandomRange(0, 1)) / (imageWidth - 1)
-				v := (j + utils.RandomRange(0, 1)) / (imageHeight - 1)
-				r := cam.GetRay(u, v)
-				pixelColor = models.AddVectors(pixelColor, RayColor(r, world, maxDepth))
-			}
-			models.WriteColor(os.Stdout, pixelColor, samplesPerPixel)
+		for i := 0; i < imageWidth; i++ {
+			models.WriteColor(os.Stdout, image[j][i], samplesPerPixel)
 		}
 	}
 	fmt.Fprintf(os.Stderr, "\nDone.\n")
