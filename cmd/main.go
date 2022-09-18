@@ -31,6 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer output.Close()
 
 	app.Raytrace(
 		*imageWidth,

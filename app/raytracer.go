@@ -43,12 +43,7 @@ func Raytrace(imageWidth int,
 	workerManager := NewWorkerManager(imageWidth, imageHeight, samplesPerPixel, maxDepth, int(numCPUs), world, cam)
 	image := workerManager.Start()
 
-	fmt.Fprintf(output, "P3\n%d %d\n255\n", imageWidth, imageHeight)
-	for j := imageHeight - 1; j >= 0; j-- {
-		for i := 0; i < imageWidth; i++ {
-			models.WriteColor(output, image[j][i], samplesPerPixel)
-		}
-	}
+	image.Write(output, samplesPerPixel)
 	fmt.Fprintf(os.Stderr, "\nDone.\n")
 }
 

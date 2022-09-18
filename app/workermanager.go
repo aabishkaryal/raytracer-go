@@ -44,7 +44,7 @@ func NewWorkerManager(imageWidth, imageHeight int, samplesPerPixel, maxDepth flo
 	}
 }
 
-func (wm WorkerManager) Start() [][]models.Color {
+func (wm WorkerManager) Start() models.Image {
 	for _, worker := range wm.workers {
 		go worker.Start()
 	}
@@ -57,18 +57,14 @@ func (wm WorkerManager) Start() [][]models.Color {
 
 	close(wm.works)
 
-	image := make([][]models.Color, wm.imageHeight)
-	for i := range image {
-		image[i] = make([]models.Color, wm.imageWidth)
-	}
-
+	image := models.NewImage(wm.imageWidth, wm.imageHeight)
 	totalWork := wm.imageWidth * wm.imageHeight
 	for i := 0; i < totalWork; i++ {
 		result := <-wm.result
-		image[result.j][result.i] = result.color
-		fmt.Fprintf(os.Stderr, "\033[2K\rPixels done: %f", (float64(i) / float64(totalWork) * 100.0))
+		image.SetPixel(result.i, result.j, result.color)
+		fmt.Fprintf(os.Stderr, "\033[2K\rPixels done: %.2f%%", float64(i)/float64(totalWork)*100.0)
 	}
-	fmt.Fprintf(os.Stderr, "\033[2K\rPixels done: %f", 100.0)
+	fmt.Fprintf(os.Stderr, "\033[2K\rPixels done: %.2f%%", 100.0)
 
 	return image
 }
